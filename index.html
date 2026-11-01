@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicSense AI | Public Issue Intelligence</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #17243b;
+        }
+
+        header {
+            background: #102747;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h2 { margin: 0; }
+        header p { margin: 6px 0 0; color: #c9d8ed; }
+
+        .hero {
+            background: linear-gradient(120deg, #173c69, #2475b8);
+            color: white;
+            padding: 38px 7%;
+        }
+
+        .hero h1 { margin-top: 0; font-size: 32px; }
+        .hero p { line-height: 1.6; max-width: 650px; }
+
+        main {
+            max-width: 1150px;
+            margin: 28px auto;
+            padding: 0 18px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card, .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 3px 15px #10274712;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            color: #1768ad;
+            font-weight: bold;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        h2 { margin-top: 0; }
+        label { display: block; font-weight: bold; margin: 15px 0 7px; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd5e2;
+            border-radius: 7px;
+            font: inherit;
+            background: white;
+        }
+
+        textarea { min-height: 115px; resize: vertical; }
+
+        button {
+            border: 0;
+            background: #1768ad;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 16px;
+        }
+
+        button:hover { background: #104d85; }
+        .full { width: 100%; }
+
+        .notice {
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        .success { background: #e0f7e9; color: #146536; }
+        .error { background: #ffebeb; color: #a52323; }
+
+        .muted { color: #65748b; font-size: 14px; line-height: 1.5; }
+        .complaint {
+            border-top: 1px solid #e5eaf1;
+            padding: 14px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            display: inline-block;
+            background: #e7f1ff;
+            color: #175a9c;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        #trackingResult { margin-top: 15px; overflow-wrap: anywhere; }
+        footer { text-align: center; padding: 25px; color: #65748b; }
+
+        @media (max-width: 750px) {
+            .layout { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 26px; }
+            header { padding: 18px 5%; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div>
+        <h2>🏙 CivicSense AI</h2>
+        <p>Intelligent Public Complaint System</p>
+    </div>
+    <div>Citizen Portal</div>
+</header>
+
+<section class="hero">
+    <h1>Make Your City Better, One Report at a Time.</h1>
+    <p>
+        Report potholes, garbage, damaged streetlights, water leakage
+        and other civic problems. Submit a complaint and keep its ID
+        to track progress.
+    </p>
+</section>
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="notice {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="stats">
+        <div class="card">
+            <div class="muted">Total Complaints Registered</div>
+            <div class="stat-number">{{ total }}</div>
+        </div>
+        <div class="card">
+            <div class="muted">Platform Status</div>
+            <div class="stat-number" style="font-size:22px">Online</div>
+            <div class="muted">Local development server</div>
+        </div>
+    </section>
+
+    <section class="layout">
+        <div class="panel">
+            <h2>Register a Complaint</h2>
+            <p class="muted">
+                Fields marked * are required. Do not include passwords,
+                identity numbers, or other sensitive personal information.
+            </p>
+
+            <form action="{{ url_for('main.register_complaint') }}"
+                  method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                <label for="name">Name (optional)</label>
+                <input id="name" name="name" maxlength="100"
+                       placeholder="Enter your name">
+
+                <label for="category">Complaint Category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select category</option>
+                    <option>Road / Pothole</option>
+                    <option>Garbage / Sanitation</option>
+                    <option>Streetlight</option>
+                    <option>Water Leakage</option>
+                    <option>Water Supply</option>
+                    <option>Drainage / Sewage</option>
+                    <option>Power Outage</option>
+                    <option>Electrical Fault</option>
+                    <option>Other</option>
+                </select>
+
+                <label for="location">Issue Location *</label>
+                <input id="location" name="location" maxlength="300"
+                       placeholder="Area, road, landmark or address" required>
+
+                <label for="description">Describe the Problem *</label>
+                <textarea id="description" name="description"
+                          maxlength="3000"
+                          placeholder="Explain the civic issue..." required></textarea>
+
+                <label for="photo">Upload Photo (optional)</label>
+                <input id="photo" name="photo" type="file"
+                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                <p class="muted">Maximum upload size: 5 MB.</p>
+
+                <button class="full" type="submit">
+                    Submit Complaint
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <section class="panel">
+                <h2>Track Your Complaint</h2>
+                <p class="muted">
+                    Enter the complaint ID shown after registration.
+                </p>
+
+                <form id="trackForm">
+                    <label for="trackId">Complaint ID</label>
+                    <input id="trackId" placeholder="Example: CIV-1234ABCD"
+                           required>
+                    <button type="submit" class="full">Check Status</button>
+                </form>
+
+                <div id="trackingResult" aria-live="polite"></div>
+            </section>
+
+            <section class="panel" style="margin-top:20px">
+                <h2>Recent Complaints</h2>
+
+                {% if recent %}
+                    {% for item in recent %}
+                        <div class="complaint">
+                            <strong>{{ item["category"] }}</strong>
+                            <p class="muted">{{ item["location"] }}</p>
+                            <span class="status">{{ item["status"] }}</span>
+                            <p class="muted">
+                                ID: <strong>{{ item["complaint_id"] }}</strong>
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="muted">
+                        No complaints registered yet. You can submit the first one.
+                    </p>
+                {% endif %}
+            </section>
+        </div>
+    </section>
+</main>
+
+<footer>
+    CivicSense AI · Intelligent Urban Issue Reporting
+</footer>
+
+<script>
+    const trackForm = document.getElementById("trackForm");
+    const trackingResult = document.getElementById("trackingResult");
+
+    trackForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const id = document.getElementById("trackId").value.trim();
+        trackingResult.textContent = "Checking complaint...";
+
+        try {
+            const response = await fetch(
+                "/api/complaints/" + encodeURIComponent(id)
+            );
+            const data = await response.json();
+
+            trackingResult.replaceChildren();
+
+            if (!response.ok || !data.success) {
+                trackingResult.textContent =
+                    data.message || "Complaint not found.";
+                return;
+            }
+
+            const c = data.complaint;
+            const title = document.createElement("h3");
+            title.textContent = c.complaint_id;
+
+            const details = document.createElement("p");
+            details.textContent =
+                "Category: " + c.category +
+                " | Status: " + c.status;
+
+            const location = document.createElement("p");
+            location.textContent = "Location: " + c.location;
+
+            const date = document.createElement("p");
+            date.textContent = "Submitted: " + c.created_at;
+
+            trackingResult.append(title, details, location, date);
+        } catch (error) {
+            trackingResult.textContent =
+                "Unable to connect. Please try again.";
+        }
+    });
+</script>
+</body>
+</html>
