@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Progress | CivicSense AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .report { max-width: 1100px; margin: 35px auto; padding: 0 18px; }
+        .report-header, .report-card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 12px; padding: 22px; margin-bottom: 18px;
+        }
+        .report-header { display:flex; justify-content:space-between; gap:15px; flex-wrap:wrap; }
+        .priority { background:#fee2e2; color:#991b1b; padding:6px 12px; border-radius:20px; }
+        .progress { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:35px 0 15px; }
+        .step { text-align:center; position:relative; font-size:12px; color:var(--muted); }
+        .dot { width:17px; height:17px; border-radius:50%; background:#d5dce5; margin:0 auto 10px; }
+        .step.done .dot { background:#398052; }
+        .step.current .dot { background:#d2a72b; }
+        .step.done, .step.current { color:var(--navy); font-weight:700; }
+        .history-item { border-left:3px solid #398052; padding:5px 0 18px 16px; margin-left:7px; }
+        .photos { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+        .photo-box { min-height:125px; background:#f1f5f9; border:1px dashed #aab7c7; border-radius:8px; display:grid; place-items:center; color:var(--muted); }
+        .remarks { white-space:pre-wrap; overflow-wrap:anywhere; }
+        @media(max-width:650px) {
+            .progress { grid-template-columns:repeat(3,1fr); row-gap:22px; }
+            .photos { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+<header class="navbar">
+    <a class="brand" href="{{ url_for('main.home') }}">
+        <span class="brand-icon">CS</span>
+        CivicSense <strong>AI</strong>
+    </a>
+    <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+</header>
+
+<main class="report">
+    <section class="report-header">
+        <div>
+            <p class="eyebrow">COMPLAINT PROGRESS REPORT</p>
+            <h2>{{ complaint["complaint_id"] }}</h2>
+            <p class="muted">{{ complaint["category"] }} · {{ complaint["location"] }}</p>
+            <p class="muted">Reported on {{ complaint["created_at"] }}</p>
+        </div>
+        <div>
+            <span class="status">{{ complaint["status"] }}</span>
+        </div>
+    </section>
+
+    <section class="report-card">
+        <h3>Complaint Progress</h3>
+        {% set stages = ["Submitted", "Department Routed", "Under Review", "Assigned", "In Progress", "Resolved"] %}
+        {% set stage_map = {
+            "Submitted": 0, "Pending": 2, "Under Review": 2,
+            "Assigned": 3, "In Progress": 4, "Resolved": 5
+        } %}
+        {% set current = stage_map.get(complaint["status"], 0) %}
+
+        {% if complaint["status"] == "Rejected" %}
+            <p class="status offline">Complaint Rejected</p>
+        {% else %}
+        <div class="progress">
+            {% for stage in stages %}
+            <div class="step {% if loop.index0 < current %}done{% elif loop.index0 == current %}current{% endif %}">
+                <div class="dot"></div>
+                {{ stage }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <p class="muted">The tracker displays the latest status recorded by the department.</p>
+    </section>
+
+    <section class="report-card">
+        <h3>Complaint Details</h3>
+        <p><strong>Category:</strong> {{ complaint["category"] }}</p>
+        <p><strong>Description:</strong> {{ complaint["description"] }}</p>
+        <p><strong>Location:</strong> {{ complaint["location"] }}</p>
+        <p><strong>Department:</strong> {{ complaint["department_name"] or "Not assigned" }}</p>
+        <p><strong>Assigned worker:</strong> {{ complaint["worker_name"] or "Not assigned" }}</p>
+    </section>
+
+    <section class="report-card">
+        <h3>Photographs</h3>
+        <div class="photos">
+            <div>
+                <p><strong>Before repair</strong></p>
+                <div class="photo-box">Original complaint photo</div>
+                <p class="muted">Photo display will be enabled with secure citizen access.</p>
+            </div>
+            <div>
+                <p><strong>After repair</strong></p>
+                <div class="photo-box">
+                    {% if complaint["resolution_proof_filename"] %}
+                        Resolution proof uploaded
+                    {% else %}
+                        Awaiting resolution proof
+                    {% endif %}
+                </div>
+                <p class="muted">Resolution proof is stored with the complaint.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="report-card">
+        <h3>Department Remarks & History</h3>
+        {% if history %}
+            {% for item in history %}
+            <div class="history-item">
+                <strong>{{ item["new_status"] }}</strong>
+                <p class="muted">{{ item["created_at"] }}</p>
+                <p class="remarks">{{ item["note"] or "Status updated." }}</p>
+                <p class="muted">Updated by: {{ item["actor_username"] }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No progress updates recorded yet.</p>
+        {% endif %}
+
+        {% if complaint["resolution_notes"] %}
+            <h4>Latest Resolution Notes</h4>
+            <p class="remarks">{{ complaint["resolution_notes"] }}</p>
+        {% endif %}
+    </section>
+
+    <section class="report-card">
+        <h3>Citizen Feedback</h3>
+        <p class="muted">
+            Rating, Confirm Resolved and Reopen actions will be enabled
+            after citizen accounts and secure complaint ownership verification
+            are implemented.
+        </p>
+    </section>
+
+    <a href="{{ url_for('main.home') }}" class="primary-button">Back to Home</a>
+</main>
+</body>
+</html>
