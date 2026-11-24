@@ -394,6 +394,39 @@ def track_complaint(complaint_id):
     return jsonify({"success": True, "complaint": dict(complaint), "history": [dict(h) for h in history]})
 
 
+# Citizen-facing complaint progress report page.
+@main_bp.route("/complaint/<complaint_id>")
+def complaint_progress_page(complaint_id):
+    complaint_id = complaint_id.strip().upper()
+
+    with connect_db() as conn:
+        complaint = conn.execute("""
+            SELECT c.*,
+                   d.name AS department_name,
+                   w.name AS worker_name
+            FROM complaints c
+            LEFT JOIN departments d ON d.id = c.department_id
+            LEFT JOIN field_workers w ON w.id = c.assigned_worker_id
+            WHERE c.complaint_id = ?
+        """, (complaint_id,)).fetchone()
+
+        if not complaint:
+            abort(404, description="Complaint not found.")
+
+        history = conn.execute("""
+            SELECT new_status, note, actor_username, created_at
+            FROM complaint_history
+            WHERE complaint_id = ?
+            ORDER BY id ASC
+        """, (complaint["id"],)).fetchall()
+
+    return render_template(
+        "track_complaint.html",
+        complaint=complaint,
+        history=history
+    )
+
+
 @main_bp.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if current_role() in {"main_admin", "department_admin"}:
