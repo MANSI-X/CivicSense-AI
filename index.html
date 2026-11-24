@@ -7,7 +7,9 @@
     <title>CivicSense AI | Public Issue Intelligence</title>
 
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -27,8 +29,14 @@
             gap: 12px;
         }
 
-        header h2 { margin: 0; }
-        header p { margin: 6px 0 0; color: #c9d8ed; }
+        header h2 {
+            margin: 0;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            color: #c9d8ed;
+        }
 
         .hero {
             background: linear-gradient(120deg, #173c69, #2475b8);
@@ -36,8 +44,15 @@
             padding: 38px 7%;
         }
 
-        .hero h1 { margin-top: 0; font-size: 32px; }
-        .hero p { line-height: 1.6; max-width: 650px; }
+        .hero h1 {
+            margin-top: 0;
+            font-size: 32px;
+        }
+
+        .hero p {
+            line-height: 1.6;
+            max-width: 650px;
+        }
 
         main {
             max-width: 1150px;
@@ -71,8 +86,15 @@
             gap: 20px;
         }
 
-        h2 { margin-top: 0; }
-        label { display: block; font-weight: bold; margin: 15px 0 7px; }
+        h2 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 7px;
+        }
 
         input, select, textarea {
             width: 100%;
@@ -83,7 +105,10 @@
             background: white;
         }
 
-        textarea { min-height: 115px; resize: vertical; }
+        textarea {
+            min-height: 115px;
+            resize: vertical;
+        }
 
         button {
             border: 0;
@@ -96,8 +121,13 @@
             margin-top: 16px;
         }
 
-        button:hover { background: #104d85; }
-        .full { width: 100%; }
+        button:hover {
+            background: #104d85;
+        }
+
+        .full {
+            width: 100%;
+        }
 
         .notice {
             padding: 13px;
@@ -106,10 +136,22 @@
             overflow-wrap: anywhere;
         }
 
-        .success { background: #e0f7e9; color: #146536; }
-        .error { background: #ffebeb; color: #a52323; }
+        .success {
+            background: #e0f7e9;
+            color: #146536;
+        }
 
-        .muted { color: #65748b; font-size: 14px; line-height: 1.5; }
+        .error {
+            background: #ffebeb;
+            color: #a52323;
+        }
+
+        .muted {
+            color: #65748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
         .complaint {
             border-top: 1px solid #e5eaf1;
             padding: 14px 0;
@@ -125,28 +167,51 @@
             font-size: 12px;
         }
 
-        #trackingResult { margin-top: 15px; overflow-wrap: anywhere; }
-        footer { text-align: center; padding: 25px; color: #65748b; }
+        #system-status.online {
+            color: #168044;
+        }
+
+        #system-status.offline {
+            color: #c62828;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #65748b;
+        }
 
         @media (max-width: 750px) {
-            .layout { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 26px; }
-            header { padding: 18px 5%; }
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            header {
+                padding: 18px 5%;
+            }
         }
     </style>
 </head>
 
 <body>
+
 <header>
     <div>
         <h2>🏙 CivicSense AI</h2>
         <p>Intelligent Public Complaint System</p>
     </div>
+
     <div>Citizen Portal</div>
 </header>
 
+
 <section class="hero">
     <h1>Make Your City Better, One Report at a Time.</h1>
+
     <p>
         Report potholes, garbage, damaged streetlights, water leakage
         and other civic problems. Submit a complaint and keep its ID
@@ -154,42 +219,79 @@
     </p>
 </section>
 
+
 <main>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
             <div class="notice {{ category }}">{{ message }}</div>
         {% endfor %}
     {% endwith %}
 
+
+    <!-- PLATFORM STATISTICS -->
+
     <section class="stats">
+
         <div class="card">
             <div class="muted">Total Complaints Registered</div>
             <div class="stat-number">{{ total }}</div>
         </div>
+
         <div class="card">
             <div class="muted">Platform Status</div>
-            <div class="stat-number" style="font-size:22px">Online</div>
+
+            <div
+                class="stat-number"
+                id="system-status"
+                style="font-size:22px"
+            >
+                Checking...
+            </div>
+
             <div class="muted">Local development server</div>
         </div>
+
     </section>
 
+
     <section class="layout">
+
+        <!-- REGISTER COMPLAINT -->
+
         <div class="panel">
+
             <h2>Register a Complaint</h2>
+
             <p class="muted">
                 Fields marked * are required. Do not include passwords,
                 identity numbers, or other sensitive personal information.
             </p>
 
-            <form action="{{ url_for('main.register_complaint') }}"
-                  method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <form
+                action="{{ url_for('main.register_complaint') }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token }}"
+                >
 
                 <label for="name">Name (optional)</label>
-                <input id="name" name="name" maxlength="100"
-                       placeholder="Enter your name">
+
+                <input
+                    id="name"
+                    name="name"
+                    maxlength="100"
+                    placeholder="Enter your name"
+                >
+
 
                 <label for="category">Complaint Category *</label>
+
                 <select id="category" name="category" required>
                     <option value="">Select category</option>
                     <option>Road / Pothole</option>
@@ -203,117 +305,246 @@
                     <option>Other</option>
                 </select>
 
+
                 <label for="location">Issue Location *</label>
-                <input id="location" name="location" maxlength="300"
-                       placeholder="Area, road, landmark or address" required>
+
+                <input
+                    id="location"
+                    name="location"
+                    maxlength="300"
+                    placeholder="Area, road, landmark or address"
+                    required
+                >
+
 
                 <label for="description">Describe the Problem *</label>
-                <textarea id="description" name="description"
-                          maxlength="3000"
-                          placeholder="Explain the civic issue..." required></textarea>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    maxlength="3000"
+                    placeholder="Explain the civic issue..."
+                    required
+                ></textarea>
+
 
                 <label for="photo">Upload Photo (optional)</label>
-                <input id="photo" name="photo" type="file"
-                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                <input
+                    id="photo"
+                    name="photo"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                >
 
                 <p class="muted">Maximum upload size: 5 MB.</p>
+
 
                 <button class="full" type="submit">
                     Submit Complaint
                 </button>
+
             </form>
+
         </div>
 
+
         <div>
+
+            <!-- TRACK COMPLAINT -->
+
             <section class="panel">
+
                 <h2>Track Your Complaint</h2>
+
                 <p class="muted">
                     Enter the complaint ID shown after registration.
                 </p>
 
                 <form id="trackForm">
+
                     <label for="trackId">Complaint ID</label>
-                    <input id="trackId" placeholder="Example: CIV-1234ABCD"
-                           required>
-                    <button type="submit" class="full">Check Status</button>
+
+                    <input
+                        type="text"
+                        id="trackId"
+                        placeholder="Example: CIV-1234ABCD"
+                        required
+                    >
+
+                    <button type="submit" class="full">
+                        Check Status
+                    </button>
+
                 </form>
 
-                <div id="trackingResult" aria-live="polite"></div>
             </section>
 
+
+            <!-- RECENT COMPLAINTS -->
+
             <section class="panel" style="margin-top:20px">
+
                 <h2>Recent Complaints</h2>
 
                 {% if recent %}
+
                     {% for item in recent %}
+
                         <div class="complaint">
+
                             <strong>{{ item["category"] }}</strong>
-                            <p class="muted">{{ item["location"] }}</p>
-                            <span class="status">{{ item["status"] }}</span>
+
                             <p class="muted">
-                                ID: <strong>{{ item["complaint_id"] }}</strong>
+                                {{ item["location"] }}
                             </p>
+
+                            <span class="status">
+                                {{ item["status"] }}
+                            </span>
+
+                            <p class="muted">
+                                ID:
+                                <strong>
+                                    {{ item["complaint_id"] }}
+                                </strong>
+                            </p>
+
                         </div>
+
                     {% endfor %}
+
                 {% else %}
+
                     <p class="muted">
-                        No complaints registered yet. You can submit the first one.
+                        No complaints registered yet.
+                        You can submit the first one.
                     </p>
+
                 {% endif %}
+
             </section>
+
         </div>
+
     </section>
+
 </main>
+
 
 <footer>
     CivicSense AI · Intelligent Urban Issue Reporting
 </footer>
 
-<script>
-    const trackForm = document.getElementById("trackForm");
-    const trackingResult = document.getElementById("trackingResult");
 
-    trackForm.addEventListener("submit", async function (event) {
+<!-- JAVASCRIPT -->
+
+<script>
+
+// ==========================================
+// 1. BACKEND HEALTH CHECK
+// ==========================================
+
+async function checkBackend() {
+
+    const statusElement = document.getElementById("system-status");
+
+    if (!statusElement) return;
+
+    try {
+
+        const response = await fetch("/api/health");
+
+        if (!response.ok) {
+            throw new Error("Backend returned an error");
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.status === "running") {
+
+            statusElement.textContent = "Backend connected";
+
+            statusElement.classList.add("online");
+            statusElement.classList.remove("offline");
+
+        } else {
+
+            throw new Error("Unexpected backend response");
+
+        }
+
+    } catch (error) {
+
+        statusElement.textContent = "Backend unavailable";
+
+        statusElement.classList.add("offline");
+        statusElement.classList.remove("online");
+
+        console.error("Backend health check failed:", error);
+
+    }
+
+}
+
+
+// ==========================================
+// 2. COMPLAINT TRACKING REDIRECT
+// ==========================================
+
+function setupComplaintTracking() {
+
+    const trackForm = document.getElementById("trackForm");
+
+    if (!trackForm) return;
+
+    trackForm.addEventListener("submit", function(event) {
+
         event.preventDefault();
 
-        const id = document.getElementById("trackId").value.trim();
-        trackingResult.textContent = "Checking complaint...";
+        const trackId = document.getElementById("trackId");
 
-        try {
-            const response = await fetch(
-                "/api/complaints/" + encodeURIComponent(id)
-            );
-            const data = await response.json();
+        if (!trackId) {
 
-            trackingResult.replaceChildren();
+            console.error("Complaint ID input not found.");
 
-            if (!response.ok || !data.success) {
-                trackingResult.textContent =
-                    data.message || "Complaint not found.";
-                return;
-            }
+            return;
 
-            const c = data.complaint;
-            const title = document.createElement("h3");
-            title.textContent = c.complaint_id;
-
-            const details = document.createElement("p");
-            details.textContent =
-                "Category: " + c.category +
-                " | Status: " + c.status;
-
-            const location = document.createElement("p");
-            location.textContent = "Location: " + c.location;
-
-            const date = document.createElement("p");
-            date.textContent = "Submitted: " + c.created_at;
-
-            trackingResult.append(title, details, location, date);
-        } catch (error) {
-            trackingResult.textContent =
-                "Unable to connect. Please try again.";
         }
+
+        const id = trackId.value.trim();
+
+        if (!id) {
+
+            alert("Please enter your Complaint ID.");
+
+            return;
+
+        }
+
+        // Redirect to the complaint progress report page
+
+        window.location.href =
+            "/complaint/" + encodeURIComponent(id);
+
     });
+
+}
+
+
+// ==========================================
+// 3. INITIALIZE FUNCTIONS
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    checkBackend();
+
+    setupComplaintTracking();
+
+});
+
 </script>
+
 </body>
 </html>
